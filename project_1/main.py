@@ -6,10 +6,18 @@ maze = maze_generator()
 
 robot_problem = RobotProblem(maze)
 
-#breadth = breadth_first_tree_search(RobotProblem(maze))
-depth_path = depth_first_tree_search(RobotProblem(maze)).path()
-#interative_deepening = iterative_deepening_search(RobotProblem(maze))
+breadth = breadth_first_graph_search(RobotProblem(maze))
+depth_path = depth_first_graph_search(RobotProblem(maze))
+#iterative_deepening = iterative_deepening_search(RobotProblem(maze))
 
-for d in depth_path:
+for d in breadth.path():
     s = d.state
-    print(dict(x=s["x"], y=s["y"], angle=s["angle"]))
+    print(s)
+
+for d in depth_path.path():
+    s = d.state
+    print(s)
+
+# for d in iterative_deepening.path():
+#     s = d.state
+#     print(s)

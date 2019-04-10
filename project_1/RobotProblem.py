@@ -18,10 +18,9 @@ class RobotProblem(Problem):
         other arguments."""
         x_robot, y_robot = np.where(maze == MazePositionType.ROBOT)
         x_goal, y_goal = np.where(maze == MazePositionType.GOAL)
-        visited_states = [dict(x=x_robot[0], y=y_robot[0], angle=0)]
-        initial_state = dict(x=x_robot[0], y=y_robot[0], angle=0, visited_states=visited_states)
+        initial_state = (x_robot[0], y_robot[0], 0)
 
-        Problem.__init__(self, initial_state, dict(x=x_goal[0], y=y_goal[0]))
+        Problem.__init__(self, initial_state, (x_goal[0], y_goal[0]))
 
         self.maze = maze
 
@@ -32,33 +31,28 @@ class RobotProblem(Problem):
         iterator, rather than building them all at once."""
         actions = []
         
-        next_state = self.result(state, Action.ROTATE_LEFT, False)
-        if not does_visited_states_contain(state["visited_states"], next_state):
-            actions.append(Action.ROTATE_LEFT)
 
-        next_state = self.result(state, Action.ROTATE_RIGHT, False)
-        if not does_visited_states_contain(state["visited_states"], next_state):
-            actions.append(Action.ROTATE_LEFT)
+        actions.append(Action.ROTATE_LEFT)
 
-        if (state["angle"] == 0 and state["y"] + 1 < len(self.maze[state["x"]]) and self.maze[state["x"], state["y"] + 1] != MazePositionType.WALL) or \
-           (state["angle"] == 90 and state["x"] + 1 < len(self.maze) and self.maze[state["x"] + 1, state["y"]] != MazePositionType.WALL) or \
-           (state["angle"] == 180 and state["y"] - 1 >= 0 and self.maze[state["x"], state["y"] - 1] != MazePositionType.WALL) or \
-           (state["angle"] == 270 and state["x"] - 1 >= 0 and self.maze[state["x"] - 1, state["y"]] != MazePositionType.WALL):
-            next_state = self.result(state, Action.GO_FOWARD, False)
-            if not does_visited_states_contain(state["visited_states"], next_state):
+
+        actions.append(Action.ROTATE_LEFT)
+
+        if (state[2] == 0 and state[1] + 1 < len(self.maze[state[0]]) and self.maze[state[0], state[1] + 1] != MazePositionType.WALL) or \
+           (state[2] == 90 and state[0] + 1 < len(self.maze) and self.maze[state[0] + 1, state[1]] != MazePositionType.WALL) or \
+           (state[2] == 180 and state[1] - 1 >= 0 and self.maze[state[0], state[1] - 1] != MazePositionType.WALL) or \
+           (state[2] == 270 and state[0] - 1 >= 0 and self.maze[state[0] - 1, state[1]] != MazePositionType.WALL):
                 actions.append(Action.GO_FOWARD)
         return actions
 
 
 
-    def result(self, state, action, check_visited=True):
+    def result(self, state, action):
         """Return the state that results from executing the given
         action in the given state. The action must be one of
         self.actions(state)."""
-        x = state["x"]
-        y = state["y"]
-        visited_states = state["visited_states"][:]
-        angle = state["angle"]
+        x = state[0]
+        y = state[1]
+        angle = state[2]
         
         if action == Action.ROTATE_LEFT:
             angle -= 90
@@ -77,18 +71,15 @@ class RobotProblem(Problem):
                 y -= 1
             elif angle == 270:
                 x -= 1
-        if check_visited:
-            visited_states.append(dict(x=x, y=y, angle=angle))
-            print(dict(x=x, y=y, angle=angle))
-
-        return dict(x=x, y=y, angle=angle, visited_states=visited_states)
+                
+        return (x, y, angle)
 
     def goal_test(self, state):
         """Return True if the state is a goal. The default method compares the
         state to self.goal or checks for state in self.goal if it is a
         list, as specified in the constructor. Override this method if
         checking against a single self.goal is not enough."""
-        return self.goal["x"] == state["x"] and self.goal["y"] == state["y"]
+        return self.goal[0] == state[0] and self.goal[1] == state[1]
 
     def path_cost(self, c, state1, action, state2):
         """Return the cost of a solution path that arrives at state2 from
