@@ -18,3 +18,10 @@ def maze_generator():
         
     maze[24][24] = MazePositionType.GOAL # indicates the goal
     return maze
+
+
+def does_visited_states_contain(visited_states, state):
+    for s in visited_states:
+        if s["x"] == state["x"] and s["y"] == state["y"] and s["angle"] == state["angle"]:
+            return True
+    return False
