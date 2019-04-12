@@ -71,7 +71,6 @@ class RobotProblem(Problem):
                 y -= 1
             elif angle == 270:
                 x -= 1
-                
         return (x, y, angle)
 
     def goal_test(self, state):
