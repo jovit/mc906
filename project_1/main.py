@@ -1,3 +1,5 @@
+import sys
+sys.path.insert(0,'/home/joao/Documents/repos/aima-python')
 from search import *
 from helpers import maze_generator, plot_tile_map
 from enums import MazePositionType
