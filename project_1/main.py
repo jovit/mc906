@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(0,'/home/joao/Documents/repos/aima-python')
+sys.path.insert(0,'/Users/joao.goncalves/Documents/Repos/aima-python')
 from search import *
 from helpers import maze_generator, plot_tile_map
 from enums import MazePositionType
@@ -10,6 +10,10 @@ import numpy as np
 def plot_path(maze, path):
     m = maze.copy()
     for d in path.path():
+        s = d.state        
+        if m[s[0], s[1]] != MazePositionType.ROBOT and m[s[0], s[1]] != MazePositionType.GOAL:
+            m[s[0], s[1]] = MazePositionType.PATH
+    for d in path.explored():
         s = d.state        
         if m[s[0], s[1]] != MazePositionType.ROBOT and m[s[0], s[1]] != MazePositionType.GOAL:
             m[s[0], s[1]] = MazePositionType.PATH

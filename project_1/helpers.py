@@ -38,8 +38,8 @@ def plot_tile_map(tiles, show_img=True):
 
     ######## THIS IS FOR CMAP ##########################################
     cmap = cm.get_cmap('viridis', len(color_map))
-    aaaaaa = np.array([tuple(np.array(color_map[b]) / 255.) for b in MazePositionType], np.dtype('float,float,float,float'))
-    cmap.colors = aaaaaa
+    cmapcolors = np.array([tuple(np.array(color_map[b]) / 255.) for b in MazePositionType], np.dtype('float,float,float,float'))
+    cmap.colors = cmapcolors
 
     ######## THIS IS FOR PLOTTING ######################################
     # two subplots, plot immediately the imshow
@@ -60,11 +60,8 @@ def plot_tile_map(tiles, show_img=True):
     # Gridlines based on minor ticks
     line_color = (90 / 255, 90 / 255, 90 / 255)
     ax1.grid(which='minor', color=line_color, linestyle='--', linewidth=1)
+  
+    plt.rcParams['figure.figsize'] = [5, 5]
 
-    cb = f.colorbar(a1, ax=ax1)
-    cb.set_ticks(np.arange(len(color_map)) * 60)
-    cb.set_ticklabels(['GOAL', 'START', 'EMPTY', 'WALL', 'VISITED', 'PATH'])
-    # set ticks for all subplots
-    plt.setp((ax1,), xticks=np.arange(width), yticks=np.arange(height))
     if show_img:
         plt.show()

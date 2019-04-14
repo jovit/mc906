@@ -20,6 +20,7 @@ class RobotProblem(Problem):
         x_robot, y_robot = np.where(maze == MazePositionType.ROBOT)
         x_goal, y_goal = np.where(maze == MazePositionType.GOAL)
         initial_state = (x_robot[0], y_robot[0])
+        self.exp = set()
 
         Problem.__init__(self, initial_state, (x_goal[0], y_goal[0]))
 
@@ -51,6 +52,8 @@ class RobotProblem(Problem):
         self.actions(state)."""
         x = state[0]
         y = state[1]
+
+        self.exp.add(state)
 
         if action == Action.GO_DOWN:
             y += 1
