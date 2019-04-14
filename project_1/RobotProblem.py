@@ -5,6 +5,7 @@ import numpy as np
 from enums import MazePositionType, Action
 from helpers import maze_generator, does_visited_states_contain
 
+
 class RobotProblem(Problem):
 
     """The abstract class for a formal problem. You should subclass
@@ -18,7 +19,7 @@ class RobotProblem(Problem):
         other arguments."""
         x_robot, y_robot = np.where(maze == MazePositionType.ROBOT)
         x_goal, y_goal = np.where(maze == MazePositionType.GOAL)
-        initial_state = (x_robot[0], y_robot[0], 0)
+        initial_state = (x_robot[0], y_robot[0])
 
         Problem.__init__(self, initial_state, (x_goal[0], y_goal[0]))
 
@@ -30,18 +31,16 @@ class RobotProblem(Problem):
         many actions, consider yielding them one at a time in an
         iterator, rather than building them all at once."""
         actions = []
-        
 
-        actions.append(Action.ROTATE_LEFT)
+        if (state[1] + 1 < len(self.maze[state[0]]) and self.maze[state[0], state[1] + 1] != MazePositionType.WALL):
+            actions.append(Action.GO_DOWN)
+        if (state[0] + 1 < len(self.maze) and self.maze[state[0] + 1, state[1]] != MazePositionType.WALL):
+            actions.append(Action.GO_RIGHT)
+        if (state[1] - 1 >= 0 and self.maze[state[0], state[1] - 1] != MazePositionType.WALL):
+            actions.append(Action.GO_UP)
+        if (state[0] - 1 >= 0 and self.maze[state[0] - 1, state[1]] != MazePositionType.WALL):
+            actions.append(Action.GO_LEFT)
 
-
-        actions.append(Action.ROTATE_LEFT)
-
-        if (state[2] == 0 and state[1] + 1 < len(self.maze[state[0]]) and self.maze[state[0], state[1] + 1] != MazePositionType.WALL) or \
-           (state[2] == 90 and state[0] + 1 < len(self.maze) and self.maze[state[0] + 1, state[1]] != MazePositionType.WALL) or \
-           (state[2] == 180 and state[1] - 1 >= 0 and self.maze[state[0], state[1] - 1] != MazePositionType.WALL) or \
-           (state[2] == 270 and state[0] - 1 >= 0 and self.maze[state[0] - 1, state[1]] != MazePositionType.WALL):
-                actions.append(Action.GO_FOWARD)
         return actions
 
 
@@ -52,26 +51,17 @@ class RobotProblem(Problem):
         self.actions(state)."""
         x = state[0]
         y = state[1]
-        angle = state[2]
+
+        if action == Action.GO_DOWN:
+            y += 1
+        if action == Action.GO_RIGHT:
+            x += 1
+        if action == Action.GO_UP:
+            y -= 1
+        if action == Action.GO_LEFT:
+            x -= 1
         
-        if action == Action.ROTATE_LEFT:
-            angle -= 90
-            if angle < 0: 
-                angle = 270
-        elif action == Action.ROTATE_RIGHT:
-            angle += 90
-            if angle == 360: 
-                angle = 0
-        elif action == Action.GO_FOWARD:
-            if angle == 0:
-                y += 1
-            elif angle == 90:
-                x += 1
-            elif angle == 180:
-                y -= 1
-            elif angle == 270:
-                x -= 1
-        return (x, y, angle)
+        return (x, y)
 
     def goal_test(self, state):
         """Return True if the state is a goal. The default method compares the
@@ -88,7 +78,15 @@ class RobotProblem(Problem):
         and action. The default method costs 1 for every step in the path."""
         return c + 1
 
-    def value(self, state):
-        """For optimization problems, each state has a value.  Hill-climbing
-        and related algorithms try to maximize this value."""
-        raise NotImplementedError
+    def squared_manhattan_distance(self, node):
+        return math.sqrt(((self.goal[0] - node.state[0]) ** 2) + ((self.goal[1] - node.state[1]) ** 2))
+
+
+    def manhattan_distance(self, node):
+        return abs(self.goal[0] - node.state[0]) + abs(self.goal[1] - node.state[1])
+
+
+    # def value(self, state):
+    #     """For optimization problems, each state has a value.  Hill-climbing
+    #     and related algorithms try to maximize this value."""
+    #     raise NotImplementedError

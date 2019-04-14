@@ -4,10 +4,10 @@ import random
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt  
 
-def maze_generator(): 
-    maze = np.zeros((60, 60))
+def maze_generator(initial_position=(0,0), goal_position=(59,59)): 
+    maze = np.full((60, 60), MazePositionType.EMPTY)
     
-    maze[0][0] = MazePositionType.ROBOT # indicates the current position of the robot
+    maze[initial_position[0], initial_position[1]] = MazePositionType.ROBOT # indicates the initial position of the robot
     
     current_line = 0
     for line in maze:
@@ -18,7 +18,7 @@ def maze_generator():
                 line[:-10] = MazePositionType.WALL
         current_line = current_line + 1
         
-    maze[59][59] = MazePositionType.GOAL # indicates the goal
+    maze[goal_position[0], goal_position[1]] = MazePositionType.GOAL # indicates the goal
     return maze
 
 
@@ -58,12 +58,12 @@ def plot_tile_map(tiles, show_img=True):
     ax1.set_yticks(np.arange(height) - .5, minor=True)
 
     # Gridlines based on minor ticks
-    line_color = (90 / 255., 90 / 255., 90 / 255.)
+    line_color = (90 / 255, 90 / 255, 90 / 255)
     ax1.grid(which='minor', color=line_color, linestyle='--', linewidth=1)
 
     cb = f.colorbar(a1, ax=ax1)
-    cb.set_ticks(np.arange(len(color_map)) * 36)
-    cb.set_ticklabels(['GOAL', 'ROBOT', 'EMPTY', 'WALL', 'VISITED', 'PATH'])
+    cb.set_ticks(np.arange(len(color_map)) * 60)
+    cb.set_ticklabels(['GOAL', 'START', 'EMPTY', 'WALL', 'VISITED', 'PATH'])
     # set ticks for all subplots
     plt.setp((ax1,), xticks=np.arange(width), yticks=np.arange(height))
     if show_img:
