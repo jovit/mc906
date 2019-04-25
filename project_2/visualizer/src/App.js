@@ -6,6 +6,7 @@ import Typography from '@material-ui/core/Typography';
 import Slider from '@material-ui/lab/Slider'
 import * as tf from '@tensorflow/tfjs';
 import m from './model/model.json'
+import { Button } from '@material-ui/core';
 
 const styles = {
   root: {
@@ -21,14 +22,30 @@ class App extends Component {
     super(props)
 
     this.state = {
-      values:[]
+      values: Array.from({length: 50}, (x,i) => i).map(it => 0)
     }
 
+    this.loadModel = this.loadModel.bind(this);
+    this.predict = this.predict.bind(this);
+
     this.loadModel()
+
   }
 
   async loadModel() {
-    const model = await tf.models.modelFromJSON(m);
+    const model = await tf.loadLayersModel("https://raw.githubusercontent.com/jovit/mc906/master/project_2/visualizer/src/model/model.json");
+    this.model = model;
+  }
+
+  predict() {
+    const values = []
+    for (const v in this.state.values) {
+      values.push(v/100);
+    }
+
+    console.log(values)
+
+    console.log(this.model.predict([tf.tensor(values)]))
   }
 
   handleChange = (i) =>
@@ -52,6 +69,8 @@ class App extends Component {
           aria-labelledby="label"
           onChange={this.handleChange(i)}
           />)}
+
+          <Button onClick={this.predict}>Predict</Button>
 
     </div>
   );
