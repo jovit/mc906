@@ -22,7 +22,7 @@ class App extends Component {
     super(props)
 
     this.state = {
-      values: Array.from({length: 50}, (x,i) => i).map(it => 0)
+      values: Array.from({length: 50}, (x,i) => 0)
     }
 
     this.loadModel = this.loadModel.bind(this);
