@@ -43,9 +43,32 @@ class App extends Component {
       values.push(v/100);
     }
 
-    console.log(values)
+    const pred = this.model.predict([tf.tensor(values, [1,50])])
+    
+    const readable_output = pred.dataSync();
+    console.log(readable_output);
 
-    console.log(this.model.predict([tf.tensor(values)]))
+
+    var c = document.getElementById("myCanvas");
+    var ctx = c.getContext("2d");
+
+    var imgd = pred.dataSync().map(it => it * 255).map(it => Math.round(it));
+
+    console.log(imgd)
+
+    // first, create a new ImageData to contain our pixels
+    var imgData = ctx.createImageData(28, 28); // width x height
+    var data = imgData.data;
+
+    // copy img byte-per-byte into our ImageData
+    for (var i = 0; i < imgd.length; i++) {
+        data[i] = imgd[i];
+    }
+
+    // now we can draw our imagedata onto the canvas
+    ctx.putImageData(imgData, 0, 0);
+
+    
   }
 
   handleChange = (i) =>
@@ -71,6 +94,8 @@ class App extends Component {
           />)}
 
           <Button onClick={this.predict}>Predict</Button>
+
+          <canvas width={200} height={200} id="myCanvas"  style={{border:"1px solid #000000"}}></canvas>
 
     </div>
   );
