@@ -62,14 +62,36 @@ class App extends Component {
 
     // copy img byte-per-byte into our ImageData
     for (var i = 0; i < imgd.length; i++) {
-        data[i] = imgd[i];
+        // red
+        data[i*4] = imgd[i];
+        // green
+        data[(i*4)+1] = imgd[i];
+        // blue
+        data[(i*4)+2] = imgd[i];
+        // alpha (always use max value)
+        data[(i*4)+3] = 255;
     }
 
+    // reset canvas scale
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    // use nearest neighboor for scaling (no blur)
+    ctx.mozImageSmoothingEnabled = false;
+    ctx.webkitImageSmoothingEnabled = false;
     // now we can draw our imagedata onto the canvas
     ctx.putImageData(imgData, 0, 0);
-
-    
-  }
+    // workaround to scale image data
+    var imgPixels = new Image();
+    // load canvas pixels
+    imgPixels.src = c.toDataURL();
+    imgPixels.onload = () => {
+        // clear canvas
+        ctx.clearRect(0, 0, c.width, c.height);
+        // scale content
+        ctx.scale(7.2, 7.2);
+        // draw image
+        ctx.drawImage(imgPixels, 0, 0);
+    }
+ }
 
   handleChange = (i) =>
     (event, value) => {
