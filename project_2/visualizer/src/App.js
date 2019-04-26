@@ -39,9 +39,11 @@ class App extends Component {
 
   predict() {
     const values = []
-    for (const v in this.state.values) {
+    for (const v of this.state.values) {
       values.push(v/100);
     }
+
+    console.log(values)
 
     const pred = this.model.predict([tf.tensor(values, [1,50])])
     
@@ -95,6 +97,7 @@ class App extends Component {
 
   handleChange = (i) =>
     (event, value) => {
+      console.log(i);
       console.log(value)
       const values = this.state.values
       values[i] = value

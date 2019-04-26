@@ -39,7 +39,7 @@ model.compile(optimizer='adadelta',
               loss='binary_crossentropy',
               metrics=['accuracy'])
 
-model.fit(x_train, x_train, epochs=1)
+model.fit(x_train, x_train, epochs=5)
 
 model.evaluate(x_test, x_test)
 
