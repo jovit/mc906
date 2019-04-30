@@ -89,7 +89,7 @@ class App extends Component {
         // clear canvas
         ctx.clearRect(0, 0, c.width, c.height);
         // scale content
-        ctx.scale(7.2, 7.2);
+        ctx.scale(5, 5);
         // draw image
         ctx.drawImage(imgPixels, 0, 0);
     }
