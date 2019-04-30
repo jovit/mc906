@@ -22,7 +22,7 @@ class App extends Component {
     super(props)
 
     this.state = {
-      values: Array.from({length: 50}, (x,i) => 0)
+      values: Array.from({length: 100}, (x,i) => 0)
     }
 
     this.loadModel = this.loadModel.bind(this);
@@ -45,7 +45,7 @@ class App extends Component {
 
     console.log(values)
 
-    const pred = this.model.predict([tf.tensor(values, [1,50])])
+    const pred = this.model.predict([tf.tensor(values, [1,100])])
     
     const readable_output = pred.dataSync();
     console.log(readable_output);
@@ -59,7 +59,7 @@ class App extends Component {
     console.log(imgd)
 
     // first, create a new ImageData to contain our pixels
-    var imgData = ctx.createImageData(28, 28); // width x height
+    var imgData = ctx.createImageData(50, 50); // width x height
     var data = imgData.data;
 
     // copy img byte-per-byte into our ImageData
@@ -110,7 +110,7 @@ class App extends Component {
   return (
     <div className="App">
 
-          {Array.from({length: 50}, (x,i) => i).map(i => <Slider
+          {Array.from({length: 100}, (x,i) => i).map(i => <Slider
           key={i}
           classes={{ container: classes.slider }}
           value={this.state.values[i]}
