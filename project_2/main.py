@@ -26,12 +26,12 @@ print(len(train[0]))
 model = tf.keras.models.Sequential([
   tf.keras.layers.Dense(50*50),
 
-  tf.keras.layers.Dense(250, activation=tf.nn.relu),
+  tf.keras.layers.Dense(2000, activation=tf.nn.relu),
   tf.keras.layers.Dropout(0.2),
 
-  tf.keras.layers.Dense(100,  activation=tf.nn.sigmoid),
+  tf.keras.layers.Dense(1000,  activation=tf.nn.sigmoid),
 
-  tf.keras.layers.Dense(250, activation=tf.nn.relu),
+  tf.keras.layers.Dense(2000, activation=tf.nn.relu),
   tf.keras.layers.Dropout(0.2),
 
   tf.keras.layers.Dense(50*50, activation=tf.nn.sigmoid, name='out'),
@@ -41,14 +41,14 @@ model.compile(optimizer='adadelta',
               loss='binary_crossentropy',
               metrics=['accuracy'])
 
-model.fit(train, train, epochs=50)
+model.fit(train, train, epochs=2)
 
 #model.evaluate(x_test, x_test)
 
 
 
 idx = 4  # index of desired layer
-layer_input = tf.keras.Input(shape=(100,)) # a new input tensor to be able to feed the desired layer
+layer_input = tf.keras.Input(shape=(1000,)) # a new input tensor to be able to feed the desired layer
 
 # create the new nodes for each layer in the path
 x = layer_input
@@ -57,7 +57,7 @@ for layer in model.layers[idx:]:
 
 # create the model
 new_model = tf.keras.Model(layer_input, x)
-output = new_model.predict(np.full((1,100), 0.5))
+output = new_model.predict(np.full((1,1000), 0.5))
 io.imshow((output[0] * 255.).reshape((50,50)).astype(int), cmap='gray')
 plt.show()
 
