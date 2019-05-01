@@ -9,6 +9,7 @@ NUMBER_OF_FEATURES = 500
 
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
+tf.random.set_random_seed(1)
 
 mnist = tf.keras.datasets.mnist
 

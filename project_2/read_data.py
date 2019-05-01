@@ -8,6 +8,7 @@ import skimage as sk
 from skimage import transform
 from skimage import util
 
+random.seed(0)
 
 def random_rotation(image_array: ndarray):
     random_degree = random.uniform(-25, 25)
