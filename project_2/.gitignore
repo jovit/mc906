@@ -2,3 +2,5 @@ imgs
 __pycache__
 
 *.h5
+
+.DS_Store/
