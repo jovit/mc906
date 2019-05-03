@@ -13,7 +13,7 @@ tf.random.set_random_seed(1)
 
 mnist = tf.keras.datasets.mnist
 
-train = read_data('imgs/train/').astype(float)
+train = read_data('imgs/train_aligned/').astype(float)
 train = train / 255.
 
 test = read_data('imgs/test/').astype(float)
@@ -44,11 +44,10 @@ model = tf.keras.models.Sequential([
 
 ])
 
-model.compile(optimizer=tf.keras.optimizers.RMSprop(),
-              loss='binary_crossentropy',
-              metrics=['accuracy'])
+model.compile(optimizer='adadelta',
+              loss='binary_crossentropy')
 
-model.fit(train, train, epochs=10, batch_size=10, validation_data=(test,test))
+model.fit(train, train, epochs=2, validation_data=(test,test))
 
 model.evaluate(test, test)
 
@@ -65,6 +64,18 @@ for layer in model.layers[idx:]:
 # create the model
 new_model = tf.keras.Model(layer_input, x)
 output = new_model.predict(np.full((1, NUMBER_OF_FEATURES), 0.5))
+io.imshow((output[0] * 255.).reshape((50, 50)).astype(int), cmap='gray')
+plt.show()
+
+output = new_model.predict(np.random.rand(1, NUMBER_OF_FEATURES))
+io.imshow((output[0] * 255.).reshape((50, 50)).astype(int), cmap='gray')
+plt.show()
+
+output = new_model.predict(np.random.rand(1, NUMBER_OF_FEATURES))
+io.imshow((output[0] * 255.).reshape((50, 50)).astype(int), cmap='gray')
+plt.show()
+
+output = new_model.predict(np.random.rand(1, NUMBER_OF_FEATURES))
 io.imshow((output[0] * 255.).reshape((50, 50)).astype(int), cmap='gray')
 plt.show()
 

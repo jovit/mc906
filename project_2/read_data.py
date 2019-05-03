@@ -33,20 +33,23 @@ def read_data(path):
     images = []
     i = 0
     for f in files:
-        image = cv2.imread(f)
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        rez_image = cv2.resize(gray, (50, 50))
-        flip = horizontal_flip(rez_image)
-        noise = random_noise(rez_image)
-        rotation1 = random_rotation(rez_image)
-        rotation2 = random_rotation(rez_image)
-        images.append(rez_image)
-        images.append(flip)
-        images.append(rotation1)
-        images.append(rotation1)
-        images.append(rotation2)
-        images.append(noise)
-        print(i)
-        i += 1
+        try:
+            image = cv2.imread(f)
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            rez_image = cv2.resize(gray, (50, 50))
+            flip = horizontal_flip(rez_image)
+            noise = random_noise(rez_image)
+            rotation1 = random_rotation(rez_image)
+            rotation2 = random_rotation(rez_image)
+            images.append(rez_image)
+            images.append(flip)
+            # images.append(rotation1)
+            # images.append(rotation1)
+            # images.append(rotation2)
+            # images.append(noise)
+            print(i)
+            i += 1
+        except:
+            pass
 
     return np.array(images)
