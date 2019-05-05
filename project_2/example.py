@@ -116,7 +116,7 @@ if __name__ == '__main__':
     for i in range(0, 25):
         city_list.append(City(str(i), x=int(random.random() * 200), y=int(random.random() * 200)))
     print(city_list)
-    population = TravellingSalesman.generate_random(100, 0.1, 0.01, 0.2, *city_list)
+    population = TravellingSalesman.generate_random(100, 0.1, 0.01, 0.6, *city_list)
     result = Darwin.genetic_algorithm(population, 1000)
     sorted_result = sorted(result, key=lambda a: a.fit, reverse=True)
 

@@ -80,15 +80,17 @@ class Population(object):
                 offspring.population.append(parents[i].breed(parents[i + 1]))
                 offspring.population.append(parents[i + 1].breed(parents[i]))
 
+        mutated_individuals = []
         for ind in offspring:
             if random.random() < offspring.mutation_rate:
-                offspring.population.append(ind.mutate())
+                mutated_individuals.append(ind.mutate())
+        offspring.population.extend(mutated_individuals)
 
         offspring.select_next_gen()
         return offspring
 
     def __len__(self):
-        return self.size
+        return len(self.population)
 
     def __iter__(self):
         return self.population.__iter__()
@@ -96,9 +98,12 @@ class Population(object):
 
 class Darwin(object):
     @staticmethod
-    def genetic_algorithm(population, generations, should_end=None, plot_result=False):
+    def genetic_algorithm(population, generations, should_end=None):
         best_individuals = [population.best_individual()]
+        next_gen = population
         for generation in range(generations):
-            children = population.generate()
-            best_individuals.append(children.best_individual())
+            if should_end and should_end(best_individuals):
+                break
+            next_gen = next_gen.generate()
+            best_individuals.append(next_gen.best_individual())
         return best_individuals
