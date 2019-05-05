@@ -49,6 +49,7 @@ class Path(Individual):
         return 1 / self.fit if self.fit != 0 else 0.
 
     def clone(self):
+        super().clone()
         r = Path(self.chromossome_mutation_rate, *[city.clone() for city in self.path])
         r.fit = 0
         return r
@@ -59,11 +60,13 @@ class Path(Individual):
 
         start_gene = min(gene_a, gene_b)
         end_gene = max(gene_a, gene_b)
-        self.path = [ind.clone() for ind in self.path]
-        self.path[start_gene:end_gene] = [ind.clone() for ind in other.path[start_gene:end_gene]]
-        self.fit = 0
+        child_path = [ind.clone() for ind in self.path]
+        child_path[start_gene:end_gene] = [ind.clone() for ind in other.path[start_gene:end_gene]]
+        child = Path(self.chromossome_mutation_rate, *child_path)
+        return child
 
     def mutate(self):
+        new_path = self.path.copy()
         for swapped in range(len(self.path)):
             if random.random() < self.chromossome_mutation_rate:
                 swap_with = int(random.random() * len(self.path))
@@ -71,9 +74,9 @@ class Path(Individual):
                 city1 = self.path[swapped].clone()
                 city2 = self.path[swap_with].clone()
 
-                self.path[swapped] = city2
-                self.path[swap_with] = city1
-        self.fit = 0
+                new_path[swapped] = city2
+                new_path[swap_with] = city1
+        return Path(self.chromossome_mutation_rate, *new_path)
 
     def __repr__(self):
         return ";".join([str(c) for c in self.path])
@@ -90,13 +93,13 @@ class TravellingSalesman(Population):
         super().__init__(source, size, mutation_rate, crossover_rate)
 
     def select_breeding_pool(self):
-        s = sorted(self.population, key=lambda p: p.fitness())
-        return s[:int(self.size / 2)]
+        return self.population[:int(self.size / 2)]
 
     def rank(self):
         return super().rank()
 
     def clone(self):
+        super().clone()
         return TravellingSalesman([path.clone() for path in self.population], self.size, self.mutation_rate, self.crossover_rate)
 
     def __repr__(self):
@@ -108,11 +111,6 @@ class TravellingSalesman(Population):
         return TravellingSalesman(population, size=len(population), mutation_rate=mutation_rate, crossover_rate=crossover_rate)
 
 
-def select_best(paths):
-    sorted_paths = sorted(paths, key=lambda x: x.fit)
-    return sorted_paths[0]
-
-
 if __name__ == '__main__':
     city_list = []
     for i in range(0, 25):
@@ -120,22 +118,17 @@ if __name__ == '__main__':
     print(city_list)
     population = TravellingSalesman.generate_random(100, 0.1, 0.01, 0.2, *city_list)
     result = Darwin.genetic_algorithm(population, 1000)
+    sorted_result = sorted(result, key=lambda a: a.fit, reverse=True)
 
-    sorted_result = list(sorted(result, key=lambda c: c[1]))
-
-    print(result[-1])
-    print(sorted_result[-1])
-
-    plot_data = list(map(lambda c: select_best(c[0].population).fit, result))
+    plot_data = list(map(lambda c: c.fit, result))
     plt.plot(plot_data)
     plt.ylabel('Distance')
     plt.xlabel('Generation')
     plt.show()
 
-    plt.cla()
-
-    plot_data = list(map(lambda c: select_best(c[0].population).fit, sorted_result))
+    plot_data = list(map(lambda c: c.fit, sorted_result))
     plt.plot(plot_data)
     plt.ylabel('Distance')
     plt.xlabel('Generation')
     plt.show()
+

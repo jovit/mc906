@@ -1,7 +1,5 @@
 import random
 
-import numpy as np
-
 
 class Individual(object):
     def __init__(self, chromossome_mutation_rate=0.):
@@ -27,14 +25,16 @@ class Individual(object):
 
     def breed(self, other):
         """
-        Mutates self based on another individual (becomes its own offspring)
+        Mutates self based on another individual
         :param other: mate partner
+        :return: its child
         """
         pass
 
     def mutate(self):
         """
         Mutates self
+        :return: a new individual based on self
         """
         pass
 
@@ -54,28 +54,37 @@ class Population(object):
                 self.population = source
             else:
                 self.population = [source() for _ in range(size)]
+        self.population.sort(key=lambda x: x.fitness(), reverse=True)
 
     def select_breeding_pool(self):
         pass
+
+    def select_next_gen(self):
+        self.population.sort(key=lambda x: x.fitness(), reverse=True)
+        self.population = self.population[:self.size]
 
     def clone(self):
         pass
 
     def rank(self):
-        return np.array(list(map(lambda ind: ind.fitness(), self.population))).max()
+        return self.population[0].fitness()
+
+    def best_individual(self):
+        return self.population[0]
 
     def generate(self):
         offspring = self.clone()
         parents = offspring.select_breeding_pool()
         for i in range(1, len(parents) - 1, 2):
             if random.random() < offspring.crossover_rate:
-                parents[i].breed(parents[i + 1])
-                parents[i + 1].breed(parents[i])
+                offspring.population.append(parents[i].breed(parents[i + 1]))
+                offspring.population.append(parents[i + 1].breed(parents[i]))
 
         for ind in offspring:
             if random.random() < offspring.mutation_rate:
-                ind.mutate()
+                offspring.population.append(ind.mutate())
 
+        offspring.select_next_gen()
         return offspring
 
     def __len__(self):
@@ -87,12 +96,9 @@ class Population(object):
 
 class Darwin(object):
     @staticmethod
-    def genetic_algorithm(population, generations, plot_result=False):
-        rank = [(population, population.rank())]
+    def genetic_algorithm(population, generations, should_end=None, plot_result=False):
+        best_individuals = [population.best_individual()]
         for generation in range(generations):
             children = population.generate()
-            rank.append((children, children.rank()))
-        return rank
-
-    # @staticmethod
-    # def select_best():
+            best_individuals.append(children.best_individual())
+        return best_individuals
