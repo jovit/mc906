@@ -102,6 +102,7 @@ class Darwin(object):
         best_individuals = [population.best_individual()]
         next_gen = population
         for generation in range(generations):
+            print("Generation {}".format(generation))
             if should_end and should_end(best_individuals):
                 break
             next_gen = next_gen.generate()
