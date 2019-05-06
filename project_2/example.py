@@ -118,15 +118,8 @@ if __name__ == '__main__':
     print(city_list)
     population = TravellingSalesman.generate_random(100, 0.1, 0.01, 0.6, *city_list)
     result = Darwin.genetic_algorithm(population, 1000)
-    sorted_result = sorted(result, key=lambda a: a.fit, reverse=True)
 
     plot_data = list(map(lambda c: c.fit, result))
-    plt.plot(plot_data)
-    plt.ylabel('Distance')
-    plt.xlabel('Generation')
-    plt.show()
-
-    plot_data = list(map(lambda c: c.fit, sorted_result))
     plt.plot(plot_data)
     plt.ylabel('Distance')
     plt.xlabel('Generation')
