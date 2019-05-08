@@ -6,8 +6,8 @@ import numpy as np
 import tensorflow as tf
 from matplotlib import pyplot as plt
 
-from project_2.genetic_algorithm import Individual, Darwin, Population
-from project_2.read_data import read_data
+from genetic_algorithm import Individual, Darwin, Population
+from read_data import read_data
 
 
 def pairwise(iterable):
@@ -31,21 +31,21 @@ class Model(Individual):
         self.model = None
 
     def fitness(self):
+        tf.random.set_random_seed(1)
+
         if not self.model:
-            layers = [tf.keras.layers.Dense(self.input_size)]
+            layers = [tf.keras.layers.Flatten(input_shape=(28, 28))]
             for i in range(self.layers // 2):
                 layers.append(tf.keras.layers.Dense(self.neurons[i], activation=tf.nn.relu))
-            layers.append(tf.keras.layers.Dense(self.num_features, activation=tf.nn.sigmoid))
-            for i in range(self.layers // 2, len(self.neurons)):
-                layers.append(tf.keras.layers.Dense(self.neurons[i], activation=tf.nn.relu))
+
             layers.append(tf.keras.layers.Dense(self.input_size, activation=tf.nn.sigmoid))
 
             self.model = tf.keras.models.Sequential(layers)
 
-            self.model.compile(optimizer='adadelta', loss='binary_crossentropy')
+            self.model.compile(optimizer='adam', loss='sparse_categorical_crossentropy')
 
-            self.model.fit(self.train_set, self.train_set, epochs=2, validation_data=(self.test_set, self.test_set))
-            self.loss = self.model.evaluate(self.test_set, self.test_set)
+            self.model.fit(self.train_set[0], self.train_set[1], epochs=1, validation_data=(self.test_set[0], self.test_set[1]))
+            self.loss = self.model.evaluate(self.test_set[0], self.test_set[1])
 
         return 1. / self.loss
 
@@ -79,7 +79,7 @@ class Model(Individual):
         child = self.clone()
         crossover_functions = [__layers_crossover, __neurons_crossover, __num_features_crossover]
         crossover_features = random.randint(1, len(crossover_functions))
-        for func in random.choices(crossover_functions, crossover_features):
+        for func in random.choices(crossover_functions, k=crossover_features):
             func(child)
         return child
 
@@ -103,7 +103,7 @@ class Model(Individual):
         other = self.clone()
         mutate_functions = [__mutate_layers, __mutate_neurons, __mutate_num_features]
         mutate_features = random.randint(1, len(mutate_functions))
-        for func in random.choices(mutate_functions, mutate_features):
+        for func in random.choices(mutate_functions, k=mutate_features):
             func(other)
         return other
 
@@ -113,7 +113,7 @@ class Model(Individual):
     @staticmethod
     def generate_random(chromossome_mutation_rate, train_set, test_set):
         layers = np.random.randint(0, 4)
-        neurons = np.random.random_integers(100, 2000, layers)
+        neurons = np.random.random_integers(100, 1000, layers)
         num_features = np.random.randint(200, 1000)
         return Model(chromossome_mutation_rate, 50 * 50, layers, neurons, num_features, train_set, test_set)
 
@@ -146,16 +146,21 @@ if __name__ == '__main__':
     os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
     tf.random.set_random_seed(1)
 
-    train = read_data('imgs/train_aligned/').astype(float)
-    train = train / 255.
+    mnist = tf.keras.datasets.mnist
 
-    test = read_data('imgs/test/').astype(float)
-    test = test / 255.
+    (x_train, y_train),(x_test, y_test) = mnist.load_data()
+    x_train, x_test = x_train / 255.0, x_test / 255.0
 
-    train = np.array([it.flatten() for it in train])
-    test = np.array([it.flatten() for it in test])
+    # train = read_data('imgs/train_aligned/').astype(float)
+    # train = train / 255.
 
-    population = FaceAutoencoderModels.generate_random(5, 0.1, 0.2, 0.6, train, test)
+    # test = read_data('imgs/test/').astype(float)
+    # test = test / 255.
+
+    # train = np.array([it.flatten() for it in train])
+    # test = np.array([it.flatten() for it in test])
+
+    population = FaceAutoencoderModels.generate_random(5, 0.1, 0.2, 0.6, (x_train, y_train), (x_test, y_test))
     result = Darwin.genetic_algorithm(population, 100)
 
     plot_data = list(map(lambda c: c.loss, result))
