@@ -99,12 +99,16 @@ class Population(object):
 class Darwin(object):
     @staticmethod
     def genetic_algorithm(population, generations, should_end=None):
-        best_individuals = [population.best_individual()]
+        best = population.best_individual()
+        best.model = None
+        best_individuals = [best]
         next_gen = population
         for generation in range(generations):
             print("Generation {} best {}".format(generation, best_individuals[generation]))
             if should_end and should_end(best_individuals):
                 break
             next_gen = next_gen.generate()
-            best_individuals.append(next_gen.best_individual())
+            best = next_gen.best_individual()
+            best.model = None
+            best_individuals.append(best)
         return best_individuals

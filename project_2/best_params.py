@@ -6,8 +6,8 @@ import numpy as np
 import tensorflow as tf
 from matplotlib import pyplot as plt
 
-from project_2.genetic_algorithm import Individual, Darwin, Population
-from project_2.read_data import read_data
+from genetic_algorithm import Individual, Darwin, Population
+from read_data import read_data
 
 MIN_NEURONS = 10
 MAX_NEURONS = 100
