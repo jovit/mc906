@@ -72,18 +72,18 @@ class Population(object):
     def best_individual(self):
         return self.population[0]
 
-    def generate(self):
+    def generate(self, mutate_function=lambda a: a.mutate(), crossover_function=lambda a, b: a.breed(b)):
         offspring = self.clone()
         parents = offspring.select_breeding_pool()
         for i in range(1, len(parents) - 1, 2):
             if random.random() < offspring.crossover_rate:
-                offspring.population.append(parents[i].breed(parents[i + 1]))
-                offspring.population.append(parents[i + 1].breed(parents[i]))
+                offspring.population.append(crossover_function(parents[i], parents[i + 1]))
+                offspring.population.append(crossover_function(parents[i + 1], parents[i]))
 
         mutated_individuals = []
         for ind in offspring:
             if random.random() < offspring.mutation_rate:
-                mutated_individuals.append(ind.mutate())
+                mutated_individuals.append(mutate_function(ind))
         offspring.population.extend(mutated_individuals)
 
         offspring.select_next_gen()

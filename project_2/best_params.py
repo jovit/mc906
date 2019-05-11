@@ -7,7 +7,8 @@ import tensorflow as tf
 from matplotlib import pyplot as plt
 
 from genetic_algorithm import Individual, Darwin, Population
-from read_data import read_data
+
+# from read_data import read_data
 
 MIN_NEURONS = 10
 MAX_NEURONS = 500
@@ -17,6 +18,7 @@ MIN_FEAT = 20
 MAX_FEAT = 100
 MIN_EPOCHS = 1
 MAX_EPOCHS = 10
+POP_SIZE = 10
 
 
 def pairwise(iterable):
@@ -55,19 +57,19 @@ class Model(Individual):
 
             self.model = tf.keras.models.Sequential(layers)
 
-            self.model.compile(optimizer='adam', loss='sparse_categorical_crossentropy' ,metrics=['accuracy'])
+            self.model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
 
             self.model.fit(self.train_set[0], self.train_set[1], epochs=self.number_of_epochs, validation_data=(self.test_set[0], self.test_set[1]))
             evaluation = self.model.evaluate(self.test_set[0], self.test_set[1])
             self.loss = evaluation[0]
             self.accuracy = evaluation[1]
 
-
         return 1. / self.loss
 
     def clone(self):
         super().clone()
-        doppelganger = Model(self.chromossome_mutation_rate, self.input_size, self.number_of_epochs, self.layers, np.copy(self.neurons), self.num_features, self.train_set,
+        doppelganger = Model(self.chromossome_mutation_rate, self.input_size, self.number_of_epochs, self.layers, np.copy(self.neurons), self.num_features,
+                             self.train_set,
                              self.test_set)
         doppelganger.loss = self.loss
         doppelganger.accuracy = self.accuracy
@@ -78,7 +80,7 @@ class Model(Individual):
             child.layers = other.layers
             neurons_len = len(child.neurons)
             if neurons_len < child.layers:
-                child.neurons = np.concatenate((child.neurons, np.copy(other.neurons[neurons_len - child.neurons:])))
+                child.neurons = np.concatenate((child.neurons, np.copy(other.neurons[neurons_len - other.layers:])))
             elif neurons_len > child.layers:
                 child.neurons = child.neurons[:child.layers]
 
@@ -100,7 +102,7 @@ class Model(Individual):
             child.number_of_epochs = other.number_of_epochs
 
         child = self.clone()
-        crossover_functions = [__neurons_crossover, __num_epochs_crossover]
+        crossover_functions = [__neurons_crossover, __num_epochs_crossover, __layers_crossover]
         crossover_features = random.randint(1, len(crossover_functions))
         for func in random.choices(crossover_functions, k=crossover_features):
             func(child)
@@ -110,7 +112,7 @@ class Model(Individual):
 
     def mutate(self):
         def __mutate_layers(other):
-            other.layers = np.random.randint(MIN_LAYERS, MAX_LAYERS)
+            other.layers = np.random.randint(MIN_LAYERS, MAX_LAYERS + 1)
             neurons_len = len(other.neurons)
             if neurons_len < other.layers:
                 other.neurons = np.concatenate((other.neurons, np.random.random_integers(MIN_NEURONS, MAX_NEURONS, size=other.layers - neurons_len)))
@@ -142,14 +144,14 @@ class Model(Individual):
 
     @staticmethod
     def generate_random(chromossome_mutation_rate, train_set, test_set):
-        layers = np.random.randint(MIN_LAYERS, MAX_LAYERS)
+        layers = np.random.randint(MIN_LAYERS, MAX_LAYERS + 1)
         neurons = np.random.random_integers(MIN_NEURONS, MAX_NEURONS, layers)
         num_features = np.random.randint(MIN_FEAT, MAX_FEAT)
         num_epochs = np.random.randint(MIN_EPOCHS, MAX_EPOCHS)
         return Model(chromossome_mutation_rate, 50 * 50, num_epochs, layers, neurons, num_features, train_set, test_set)
 
 
-class FaceAutoencoderModels(Population):
+class Models(Population):
 
     def __init__(self, source, size=None, mutation_rate=0., crossover_rate=0.):
         super().__init__(source, size, mutation_rate, crossover_rate)
@@ -162,7 +164,7 @@ class FaceAutoencoderModels(Population):
 
     def clone(self):
         super().clone()
-        return FaceAutoencoderModels([model.clone() for model in self.population], self.size, self.mutation_rate, self.crossover_rate)
+        return Models([model.clone() for model in self.population], self.size, self.mutation_rate, self.crossover_rate)
 
     def __repr__(self):
         return ";".join([str(c) for c in self.population])
@@ -170,7 +172,7 @@ class FaceAutoencoderModels(Population):
     @staticmethod
     def generate_random(size, chromossome_mutation_rate, mutation_rate, crossover_rate, train_set, test_set):
         population = [Model.generate_random(chromossome_mutation_rate, train_set, test_set) for _ in range(size)]
-        return FaceAutoencoderModels(population, size=len(population), mutation_rate=mutation_rate, crossover_rate=crossover_rate)
+        return Models(population, size=len(population), mutation_rate=mutation_rate, crossover_rate=crossover_rate)
 
 
 def end_alg(best):
@@ -203,8 +205,8 @@ if __name__ == '__main__':
     # train = np.array([it.flatten() for it in train])
     # test = np.array([it.flatten() for it in test])
 
-    population = FaceAutoencoderModels.generate_random(size=10, chromossome_mutation_rate=0.1, mutation_rate=0.2, crossover_rate=0.6,
-                                                       train_set=(x_train, y_train), test_set=(x_test, y_test))
+    population = Models.generate_random(size=POP_SIZE, chromossome_mutation_rate=0.5, mutation_rate=0.7, crossover_rate=0.8,
+                                        train_set=(x_train, y_train), test_set=(x_test, y_test))
     result = Darwin.genetic_algorithm(population, 100)
     print("Best: {}".format(result[-1]))
     plot_data = list(map(lambda c: c.loss, result))
