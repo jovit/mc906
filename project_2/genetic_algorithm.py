@@ -98,7 +98,7 @@ class Population(object):
 
 class Darwin(object):
     @staticmethod
-    def genetic_algorithm(population, generations, should_end=None):
+    def genetic_algorithm(population, generations, mutation_function, crossover_function, should_end=None):
         best = population.best_individual()
         best.model = None
         best_individuals = [best]
@@ -107,7 +107,7 @@ class Darwin(object):
             print("Generation {} best {}".format(generation, best_individuals[generation]))
             if should_end and should_end(best_individuals):
                 break
-            next_gen = next_gen.generate()
+            next_gen = next_gen.generate(mutate_function=mutation_function, crossover_function=crossover_function)
             best = next_gen.best_individual()
             best.model = None
             best_individuals.append(best)

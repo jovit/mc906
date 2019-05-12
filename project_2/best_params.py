@@ -177,14 +177,69 @@ class Models(Population):
 
 def end_alg(best):
     if len(best) > 15:
-        threshold = .0
+        threshold = .0001
         last_gens = np.array([i.loss for i in best[-5:-1]])
         calc = np.array([i.loss for i in best[-4:]])
         delta = last_gens - calc
-        idx = np.where(delta > threshold)
-        return len(idx[0]) == 0
+        idx = np.where(delta < threshold)
+        return len(idx[0]) > 5
     else:
         return False
+
+
+def mutate_01(individual):
+    return individual.mutate()
+
+
+def mutate_02(individual):
+    def __mutate_layers(other):
+        other.layers = np.random.randint(MIN_LAYERS, MAX_LAYERS + 1)
+        neurons_len = len(other.neurons)
+        if neurons_len < other.layers:
+            # duplicate last neurons
+            other.neurons = np.concatenate((other.neurons, np.copy(other.neurons[neurons_len - other.layers:])))
+        elif neurons_len > other.layers:
+            other.neurons = other.neurons[:other.layers]
+
+    def __mutate_neurons(other):
+        if random.random() < individual.chromossome_mutation_rate:
+            other.neurons = np.random.uniform(MIN_NEURONS, MAX_NEURONS + 1, size=other.layers)
+
+    def __mutate_num_epochs(other):
+        other.num_features = np.random.randint(MIN_EPOCHS, MAX_EPOCHS)
+
+    other = individual.clone()
+    mutate_functions = [__mutate_layers, __mutate_neurons, __mutate_num_epochs]
+    mutate_features = random.randint(1, len(mutate_functions))
+    for func in random.choices(mutate_functions, k=mutate_features):
+        func(other)
+        other.loss = 0
+        other.model = None
+    return other
+
+
+def crossover_01(individual, partner):
+    return individual.breed(partner)
+
+
+def crossover_02(individual, partner):
+    def __neurons_crossover(child):
+        child_neurons = np.copy(individual.neurons)
+        # switch last neuron for partner's
+        child_neurons[-1:] = np.copy(partner.neurons[-1:])
+        child.neurons = child_neurons
+
+    def __num_epochs_crossover(child):
+        child.number_of_epochs = partner.number_of_epochs
+
+    child = individual.clone()
+    crossover_functions = [__neurons_crossover, __num_epochs_crossover]
+    crossover_features = random.randint(1, len(crossover_functions))
+    for func in random.choices(crossover_functions, k=crossover_features):
+        func(child)
+        child.loss = 0
+        child.model = None
+    return child
 
 
 if __name__ == '__main__':
@@ -207,7 +262,7 @@ if __name__ == '__main__':
 
     population = Models.generate_random(size=POP_SIZE, chromossome_mutation_rate=0.5, mutation_rate=0.7, crossover_rate=0.8,
                                         train_set=(x_train, y_train), test_set=(x_test, y_test))
-    result = Darwin.genetic_algorithm(population, 100)
+    result = Darwin.genetic_algorithm(population, generations=100, mutation_function=mutate_02, crossover_function=crossover_02, should_end=end_alg)
     print("Best: {}".format(result[-1]))
     plot_data = list(map(lambda c: c.loss, result))
     acc_data = list(map(lambda c: c.accuracy, result))
