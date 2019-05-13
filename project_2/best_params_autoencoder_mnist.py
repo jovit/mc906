@@ -73,7 +73,7 @@ class Model(Individual):
             child.layers = other.layers
             neurons_len = len(child.neurons)
             if neurons_len < child.layers:
-                child.neurons = np.concatenate((child.neurons, np.copy(other.neurons[neurons_len - child.neurons:])))
+                child.neurons = np.concatenate((child.neurons, np.copy(other.neurons[neurons_len - child.layers:])))
             elif neurons_len > child.layers:
                 child.neurons = child.neurons[:child.layers]
 
