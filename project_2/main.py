@@ -47,7 +47,7 @@ model = tf.keras.models.Sequential([
 model.compile(optimizer='adadelta',
               loss='binary_crossentropy')
 
-model.fit(train, train, epochs=2, validation_data=(test,test))
+model.fit(train, train, epochs=1000, validation_data=(test,test))
 
 model.evaluate(test, test)
 
@@ -80,5 +80,4 @@ io.imshow((output[0] * 255.).reshape((50, 50)).astype(int), cmap='gray')
 plt.show()
 
 new_model.save('model1.h5')
-
-print(output)
+model.save('fullmodel.h5')

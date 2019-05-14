@@ -10,7 +10,7 @@ from genetic_algorithm import Individual, Darwin, Population
 from read_data import read_data
 
 MIN_NEURONS = 10
-MAX_NEURONS = 500
+MAX_NEURONS = 1000
 MIN_LAYERS = 1
 MAX_LAYERS = 4
 MIN_FEAT = 20
@@ -28,7 +28,7 @@ def pairwise(iterable):
 
 class Model(Individual):
     # [layers(0-4), neurons(100-2000), numfeatures(200, 1000), loss(binary_crossentropy, mse)]
-    def __init__(self, chromossome_mutation_rate, input_size, layers, neurons, num_features, train_set, test_set):
+    def __init__(self, chromossome_mutation_rate, input_size, number_of_epochs, layers, neurons, num_features, train_set, test_set):
         super().__init__(chromossome_mutation_rate)
         self.input_size = input_size
         self.layers = layers
@@ -37,7 +37,9 @@ class Model(Individual):
         self.train_set = train_set
         self.test_set = test_set
         self.loss = 0
+        self.accuracy = 0
         self.model = None
+        self.number_of_epochs = number_of_epochs
 
     def fitness(self):
         tf.random.set_random_seed(1)
@@ -56,14 +58,14 @@ class Model(Individual):
 
             self.model.compile(optimizer='adadelta', loss='binary_crossentropy')
 
-            self.model.fit(self.train_set, self.train_set, epochs=4, validation_data=(self.test_set, self.test_set))
+            self.model.fit(self.train_set, self.train_set, epochs=self.number_of_epochs, validation_data=(self.test_set, self.test_set))
             self.loss = self.model.evaluate(self.test_set, self.test_set)
 
         return 1. / self.loss
 
     def clone(self):
         super().clone()
-        doppelganger = Model(self.chromossome_mutation_rate, self.input_size, self.layers, np.copy(self.neurons), self.num_features, self.train_set,
+        doppelganger = Model(self.chromossome_mutation_rate, self.input_size, self.number_of_epochs, self.layers, np.copy(self.neurons), self.num_features, self.train_set,
                              self.test_set)
         doppelganger.loss = self.loss
         return doppelganger
@@ -91,8 +93,11 @@ class Model(Individual):
         def __num_features_crossover(child):
             child.num_features = other.num_features
 
+        def __num_epochs_crossover(child):
+            child.number_of_epochs = other.number_of_epochs
+
         child = self.clone()
-        crossover_functions = [__layers_crossover, __neurons_crossover, __num_features_crossover]
+        crossover_functions = [__neurons_crossover, __num_features_crossover, __num_epochs_crossover]
         crossover_features = random.randint(1, len(crossover_functions))
         for func in random.choices(crossover_functions, k=crossover_features):
             func(child)
@@ -117,8 +122,11 @@ class Model(Individual):
         def __mutate_num_features(other):
             other.num_features = np.random.randint(MIN_FEAT, MAX_FEAT)
 
+        def __mutate_num_epochs(other):
+            other.num_features = np.random.randint(MIN_EPOCHS, MAX_EPOCHS)
+
         other = self.clone()
-        mutate_functions = [__mutate_layers, __mutate_neurons, __mutate_num_features]
+        mutate_functions = [__mutate_layers, __mutate_neurons, __mutate_num_features, __mutate_num_epochs]
         mutate_features = random.randint(1, len(mutate_functions))
         for func in random.choices(mutate_functions, k=mutate_features):
             func(other)
@@ -127,14 +135,15 @@ class Model(Individual):
         return other
 
     def __repr__(self):
-        return "Layers: {}, Neurons: {}, # Features: {}, Loss: {}".format(self.layers, self.neurons, self.num_features, self.loss)
+        return "Layers: {}, Neurons: {}, Loss: {}, Epochs: {}".format(self.layers, self.neurons, self.loss, self.number_of_epochs)
 
     @staticmethod
     def generate_random(chromossome_mutation_rate, train_set, test_set):
         layers = np.random.randint(MIN_LAYERS, MAX_LAYERS)
         neurons = np.random.random_integers(MIN_NEURONS, MAX_NEURONS, layers)
         num_features = np.random.randint(MIN_FEAT, MAX_FEAT)
-        return Model(chromossome_mutation_rate, 28 * 28, layers, neurons, num_features, train_set, test_set)
+        num_epochs = np.random.randint(MIN_EPOCHS, MAX_EPOCHS)
+        return Model(chromossome_mutation_rate, 28 * 28, num_epochs, layers, neurons, num_features, train_set, test_set)
 
 
 class FaceAutoencoderModels(Population):
