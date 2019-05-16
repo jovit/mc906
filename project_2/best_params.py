@@ -176,13 +176,14 @@ class Models(Population):
 
 
 def end_alg(best):
-    if len(best) > 15:
-        threshold = .0001
-        last_gens = np.array([i.loss for i in best[-5:-1]])
-        calc = np.array([i.loss for i in best[-4:]])
+    sample_count = 5
+    if len(best) > sample_count:
+        threshold = .001
+        last_gens = np.array([i.loss for i in best[-sample_count:-1]])
+        calc = np.array([i.loss for i in best[-(sample_count - 1):]])
         delta = last_gens - calc
         idx = np.where(delta < threshold)
-        return len(idx[0]) > 5
+        return len(idx[0]) > 3
     else:
         return False
 
