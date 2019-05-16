@@ -181,6 +181,15 @@ def end_alg(best):
     else:
         return False
 
+def mutate_01(individual):
+    return individual.mutate()
+
+
+
+def crossover_01(individual, partner):
+    return individual.breed(partner)
+
+
 
 if __name__ == '__main__':
     os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
@@ -202,7 +211,7 @@ if __name__ == '__main__':
 
     population = FaceAutoencoderModels.generate_random(size=10, chromossome_mutation_rate=0.1, mutation_rate=0.2, crossover_rate=0.6,
                                                        train_set=x_train, test_set=x_test)
-    result = Darwin.genetic_algorithm(population, 100)
+    result = Darwin.genetic_algorithm(population, 100, mutation_function=mutate_01, crossover_function=crossover_01)
     print("Best: {}".format(result[-1]))
     plot_data = list(map(lambda c: c.loss, result))
     plt.plot(plot_data)

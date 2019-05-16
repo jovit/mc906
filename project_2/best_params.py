@@ -18,7 +18,7 @@ MIN_FEAT = 20
 MAX_FEAT = 100
 MIN_EPOCHS = 1
 MAX_EPOCHS = 10
-POP_SIZE = 10
+POP_SIZE = 5
 
 
 def pairwise(iterable):
@@ -64,7 +64,7 @@ class Model(Individual):
             self.loss = evaluation[0]
             self.accuracy = evaluation[1]
 
-        return 1. / self.loss
+        return 1 / self.loss
 
     def clone(self):
         super().clone()
@@ -140,7 +140,7 @@ class Model(Individual):
         return other
 
     def __repr__(self):
-        return "Layers: {}, Neurons: {}, Loss: {}, Epochs: {}".format(self.layers, self.neurons, self.loss, self.number_of_epochs)
+        return "Layers: {}, Neurons: {}, Loss: {}, Epochs: {}, Acc: {}".format(self.layers, self.neurons, self.loss, self.number_of_epochs, self.accuracy)
 
     @staticmethod
     def generate_random(chromossome_mutation_rate, train_set, test_set):
@@ -157,7 +157,7 @@ class Models(Population):
         super().__init__(source, size, mutation_rate, crossover_rate)
 
     def select_breeding_pool(self):
-        return self.population[:int(self.size / 2)]
+        return self.population
 
     def rank(self):
         return super().rank()
@@ -262,7 +262,7 @@ if __name__ == '__main__':
 
     population = Models.generate_random(size=POP_SIZE, chromossome_mutation_rate=0.5, mutation_rate=0.7, crossover_rate=0.8,
                                         train_set=(x_train, y_train), test_set=(x_test, y_test))
-    result = Darwin.genetic_algorithm(population, generations=100, mutation_function=mutate_02, crossover_function=crossover_02, should_end=end_alg)
+    result = Darwin.genetic_algorithm(population, generations=100, mutation_function=mutate_02, crossover_function=crossover_01, should_end=end_alg)
     print("Best: {}".format(result[-1]))
     plot_data = list(map(lambda c: c.loss, result))
     acc_data = list(map(lambda c: c.accuracy, result))
